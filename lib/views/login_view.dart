@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:developer' as devtools show log;
 
 import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/views/utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -71,13 +72,25 @@ class _LoginViewState extends State<LoginView> {
                   devtools.log(e.toString());
                   devtools.log(e.runtimeType.toString());
                   if (e.code == 'user-not-found') {
-                    devtools.log('User Not Found');
+                    //devtools.log('User Not Found');
+                    showErrorDialog(
+                      context,
+                      'User Not Found',
+                    );
                   }
                   if (e.code == 'wrong-password') {
-                    devtools.log("Wrong password");
+                    //devtools.log("Wrong password");
+                    showErrorDialog(
+                      context,
+                      'Wrong password',
+                    );
                   }
                 } catch (e) {
-                  devtools.log("Something went ...$e");
+                  //devtools.log("Something went ...$e");
+                  showErrorDialog(
+                    context,
+                    'Something went wrong .. $e',
+                  );
                 }
               },
               child: const Text('Login')),
