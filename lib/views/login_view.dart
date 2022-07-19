@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'dart:developer' as devtools show log;
 
 import 'package:mynotes/constants/routes.dart';
-import 'package:mynotes/views/utilities/show_error_dialog.dart';
+
+import '../utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -58,36 +59,40 @@ class _LoginViewState extends State<LoginView> {
                 final email = _email.text;
                 final password = _password.text;
                 try {
-                  final userCredential =
-                      await FirebaseAuth.instance.signInWithEmailAndPassword(
+                  await FirebaseAuth.instance.signInWithEmailAndPassword(
                     email: email,
                     password: password,
                   );
-                  devtools.log((userCredential.toString()));
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    notesRoute,
-                    (route) => false,
-                  );
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user?.emailVerified ?? false) {
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      notesRoute,
+                      (route) => false,
+                    );
+                  } else {
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      verifyEmailRoute,
+                      (route) => false,
+                    );
+                  }
                 } on FirebaseAuthException catch (e) {
-                  devtools.log(e.toString());
-                  devtools.log(e.runtimeType.toString());
                   if (e.code == 'user-not-found') {
                     //devtools.log('User Not Found');
-                    showErrorDialog(
+                    await showErrorDialog(
                       context,
                       'User Not Found',
                     );
                   }
                   if (e.code == 'wrong-password') {
                     //devtools.log("Wrong password");
-                    showErrorDialog(
+                    await showErrorDialog(
                       context,
                       'Wrong password',
                     );
                   }
                 } catch (e) {
                   //devtools.log("Something went ...$e");
-                  showErrorDialog(
+                  await showErrorDialog(
                     context,
                     'Something went wrong .. $e',
                   );
