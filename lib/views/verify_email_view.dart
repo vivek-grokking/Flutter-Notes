@@ -3,8 +3,6 @@ import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
 
 class VerifyEmailView extends StatefulWidget {
-  const VerifyEmailView({Key? key}) : super(key: key);
-
   @override
   State<VerifyEmailView> createState() => _VerifyEmailViewState();
 }
