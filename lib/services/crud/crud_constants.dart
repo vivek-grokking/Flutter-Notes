@@ -4,7 +4,7 @@ const userIdColumn = "user_id";
 const textColumn = "text";
 const isSyncedWithCloudColumn = "is_synced_with_cloud";
 const dbName = "mynotes.db";
-const notesTable = "note";
+const notesTable = "notes";
 const usersTable = "user";
 const createUserTable = '''
         CREATE TABLE IF NOT EXISTS "user" (
