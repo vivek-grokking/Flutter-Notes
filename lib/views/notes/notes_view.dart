@@ -6,6 +6,7 @@ import 'package:mynotes/views/notes/notes_list_view.dart';
 
 import '../../constants/routes.dart';
 import '../../enums/menu_action.dart';
+import '../../utilities/dialogues/logout_dialog.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({Key? key}) : super(key: key);
@@ -33,7 +34,7 @@ class _NotesViewState extends State<NotesView> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.of(context).pushNamed(newNotesRoute);
+              Navigator.of(context).pushNamed(createUpdateNoteRoute);
             },
             icon: const Icon(Icons.add),
           ),
@@ -77,7 +78,15 @@ class _NotesViewState extends State<NotesView> {
                                 snapshot.data as List<DatabaseNote>;
                             return NotesListView(
                               notes: allNotes,
-                              onDeleteNote: onDeleteNote,
+                              onDeleteNote: (note) async {
+                                await _notesService.deleteNote(id: note.id);
+                              },
+                              onTap: (note) async {
+                                Navigator.of(context).pushNamed(
+                                  createUpdateNoteRoute,
+                                  arguments: note,
+                                );
+                              },
                             );
                           } else {
                             return const CircularProgressIndicator();

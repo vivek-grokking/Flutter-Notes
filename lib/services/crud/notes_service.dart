@@ -170,7 +170,7 @@ class NotesService {
       where: 'id = ?',
       whereArgs: [id],
     );
-    if (deletedCount != 0) {
+    if (deletedCount == 0) {
       throw CouldNotDeleteNoteException();
     } else {
       _notes.removeWhere((note) => note.id == id);
