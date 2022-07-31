@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
 import 'package:mynotes/services/crud/database_note.dart';
 import 'package:mynotes/services/crud/notes_service.dart';
+import 'package:mynotes/views/notes/notes_list_view.dart';
 
 import '../../constants/routes.dart';
 import '../../enums/menu_action.dart';
@@ -14,7 +15,7 @@ class NotesView extends StatefulWidget {
 }
 
 class _NotesViewState extends State<NotesView> {
-  String get userEmail => AuthService.firebase().currentUser!.email!;
+  String get userEmail => AuthService.firebase().currentUser!.email;
   late final NotesService _notesService;
 
   @override
@@ -74,19 +75,10 @@ class _NotesViewState extends State<NotesView> {
                           if (snapshot.hasData) {
                             final allNotes =
                                 snapshot.data as List<DatabaseNote>;
-                            return ListView.builder(
-                                itemCount: allNotes.length,
-                                itemBuilder: (context, index) {
-                                  final currentNote = allNotes[index];
-                                  return ListTile(
-                                    title: Text(
-                                      currentNote.text,
-                                      maxLines: 1,
-                                      softWrap: true,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  );
-                                });
+                            return NotesListView(
+                              notes: allNotes,
+                              onDeleteNote: onDeleteNote,
+                            );
                           } else {
                             return const CircularProgressIndicator();
                           }
@@ -100,27 +92,4 @@ class _NotesViewState extends State<NotesView> {
           }),
     );
   }
-}
-
-Future<bool> showLogoutDialog(BuildContext context) {
-  return showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Sign Out'),
-          content: const Text('Are you sure you want to sign out ?'),
-          actions: [
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(false);
-                },
-                child: const Text('Cancel')),
-            TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop(true);
-                },
-                child: const Text('Log out')),
-          ],
-        );
-      }).then((value) => value ?? false);
 }
