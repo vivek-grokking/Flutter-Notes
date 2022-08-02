@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:mynotes/extensions/list/filter.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' show join;
@@ -11,6 +12,7 @@ import 'database_user.dart';
 class NotesService {
   Database? _db;
   List<DatabaseNote> _notes = [];
+  DatabaseUser? _user;
 
   NotesService._sharedInstance() {
     _notesStreamController =
@@ -25,14 +27,31 @@ class NotesService {
 
   late final StreamController<List<DatabaseNote>> _notesStreamController;
 
-  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
+  Stream<List<DatabaseNote>> get allNotes =>
+      _notesStreamController.stream.filter((note) {
+        final currentUser = _user;
+        if (currentUser != null) {
+          return note.userId == currentUser.id;
+        } else {
+          throw UserShouldBeSetBeforeWeReadNotesException();
+        }
+      });
 
-  Future<DatabaseUser> getOrCreateUser({required String email}) async {
+  Future<DatabaseUser> getOrCreateUser({
+    required String email,
+    bool setAsCurrentUser = true,
+  }) async {
     try {
       final user = await getUser(email: email);
+      if (setAsCurrentUser) {
+        _user = user;
+      }
       return user;
     } on UserDoesNotExistsException {
       final createdUser = await createUser(email: email);
+      if (setAsCurrentUser) {
+        _user = createdUser;
+      }
       return createdUser;
     } catch (e) {
       rethrow; // only for debugging
@@ -40,7 +59,7 @@ class NotesService {
   }
 
   Future<void> _cacheNotes() async {
-    final allNotes = await getAllNotes();
+    final allNotes = await _getAllNotes();
     _notes = allNotes.toList();
     _notesStreamController.add(_notes);
   }
@@ -206,7 +225,7 @@ class NotesService {
     }
   }
 
-  Future<Iterable<DatabaseNote>> getAllNotes() async {
+  Future<Iterable<DatabaseNote>> _getAllNotes() async {
     await _ensureDbIdOpen();
     final db = _getDatabaseOrThrow();
     final notes = await db.query(
@@ -224,10 +243,14 @@ class NotesService {
 
     // make sure note exists
     await getNote(noteId: note.id);
-    final updatesCount = await db.update(notesTable, {
-      textColumn: text,
-      isSyncedWithCloudColumn: 0,
-    });
+    final updatesCount = await db.update(
+        notesTable,
+        {
+          textColumn: text,
+          isSyncedWithCloudColumn: 0,
+        },
+        where: 'id = ?',
+        whereArgs: [note.id]);
     if (updatesCount == 0) {
       throw CouldNotUpdateNote();
     } else {

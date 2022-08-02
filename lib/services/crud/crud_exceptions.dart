@@ -15,3 +15,5 @@ class UserDoesNotExistsException implements Exception {}
 class NoteDoesNotExistsException implements Exception {}
 
 class CouldNotUpdateNote implements Exception {}
+
+class UserShouldBeSetBeforeWeReadNotesException implements Exception {}
